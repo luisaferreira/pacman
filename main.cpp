@@ -9,6 +9,7 @@
 #include <vector>
 
 string mensagemFinal;
+int pontuacaoMaxima;
 bool gameOver;
 enum eDirecao { LEFT, RIGHT, UP, DOWN, STOP };
 DigitalOut V5(PF_1);
@@ -51,22 +52,23 @@ char mapa[40][79] = {
 "oo      oooo      oo  oooooooooooooooooooooooooooooooooooooooo  oo      oo  oo",
 "oo  oo        oo  oo                    * oo                    oo  oo      oo",
 "oo  oo        oo  oo                      oo                    oo  oo      oo",
+"oo     oooo       oo  oooooo  oooooo    oooooo  oooooo  oooooo  oo      oo* oo",
 "oo     oooo       oo  oooooo  oooooo    oooooo  oooooo  oooooo  oo      oo  oo",
-"oo     oooo       oo  oooooo  oooooo    oooooo  oooooo  oooooo  oo      oo  oo",
+"oo  oo        oooooo                                            oo  oo    * oo",
 "oo  oo        oooooo                                            oo  oo      oo",
-"oo  oo        oooooo                                            oo  oo      oo",
+"oo          oooooooo  oooooooooooooooo  oooooooooooooooooooooo  oo  oo  oo* oo",
 "oo          oooooooo  oooooooooooooooo  oooooooooooooooooooooo  oo  oo  oo  oo",
-"oo          oooooooo  oooooooooooooooo  oooooooooooooooooooooo  oo  oo  oo  oo",
+"oo  oo                oooooooooooooooo  oooooooooooooooooooooo      oo    * oo",
 "oo  oo                oooooooooooooooo  oooooooooooooooooooooo      oo      oo",
-"oo  oo                oooooooooooooooo  oooooooooooooooooooooo      oo      oo",
-"oo      oo   ooooooooooooooooooooooooo  oooooooooooooooooooooooooo      oo  oo",
+"oo      oo   ooooooooooooooooooooooooo  oooooooooooooooooooooooooo      oo* oo",
 "oo      oo   ooooooooooooooooooooooooo  oooooooooooooooooooooooooo      oo  oo",
 "oo                                                                          oo",
 "oo                                                                          oo",
 "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo",
 };
 
-void Iniciar() { gameOver = false; }
+void Iniciar() { gameOver = false;
+pontuacaoMaxima = 50; }
 
 void RenderMapa() {
   for (int i = 0; i < 40; i++)
@@ -192,6 +194,7 @@ void Logic2() {
 }
 
 void Logic() {
+
   if (jogador1.dir == UP && mapa[jogador1.y - 1][jogador1.x] == 'o')
     return;
 
@@ -222,10 +225,13 @@ void Logic() {
   default:
     break;
   }
+
   if (mapa[jogador1.y][jogador1.x] == '*') {
     jogador1.pontuacao += 10;
     mapa[jogador1.y][jogador1.x] = ' ';
   }
+
+  
 }
 
 int main() {
@@ -237,12 +243,14 @@ int main() {
   while (!gameOver) {
     //   RenderMapa();
     RenderizarMapa();
+if(jogador1.pontuacao == pontuacaoMaxima)
+        gameOver = true;
     Input();
     Input2();
     Logic();
     Logic2();
   }
 
-  cout << mensagemFinal;
+  cout << gameOver;
   return 0;
 }
