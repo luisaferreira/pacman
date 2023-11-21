@@ -250,9 +250,7 @@ int main() {
     Logic2();
   }
 
-cout<< endl;
-cout<< endl;
+cout << "\n\n" << mensagemFinal << endl;
 
-  printf("/n/n%s", mensagemFinal.c_str());
   return 0;
 }
