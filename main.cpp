@@ -8,7 +8,7 @@
 #include <iostream>
 #include <vector>
 
-string mensagemFinal;
+string mensagemFinal = "";
 int pontuacaoMaxima;
 bool gameOver;
 enum eDirecao { LEFT, RIGHT, UP, DOWN, STOP };
@@ -52,15 +52,15 @@ char mapa[40][79] = {
 "oo      oooo      oo  oooooooooooooooooooooooooooooooooooooooo  oo      oo  oo",
 "oo  oo        oo  oo                    * oo                    oo  oo      oo",
 "oo  oo        oo  oo                      oo                    oo  oo      oo",
-"oo     oooo       oo  oooooo  oooooo    oooooo  oooooo  oooooo  oo      oo* oo",
 "oo     oooo       oo  oooooo  oooooo    oooooo  oooooo  oooooo  oo      oo  oo",
-"oo  oo        oooooo                                            oo  oo    * oo",
+"oo     oooo       oo  oooooo  oooooo    oooooo  oooooo  oooooo  oo      oo  oo",
 "oo  oo        oooooo                                            oo  oo      oo",
-"oo          oooooooo  oooooooooooooooo  oooooooooooooooooooooo  oo  oo  oo* oo",
+"oo  oo        oooooo                                            oo  oo      oo",
 "oo          oooooooo  oooooooooooooooo  oooooooooooooooooooooo  oo  oo  oo  oo",
-"oo  oo                oooooooooooooooo  oooooooooooooooooooooo      oo    * oo",
+"oo          oooooooo  oooooooooooooooo  oooooooooooooooooooooo  oo  oo  oo  oo",
 "oo  oo                oooooooooooooooo  oooooooooooooooooooooo      oo      oo",
-"oo      oo   ooooooooooooooooooooooooo  oooooooooooooooooooooooooo      oo* oo",
+"oo  oo                oooooooooooooooo  oooooooooooooooooooooo      oo      oo",
+"oo      oo   ooooooooooooooooooooooooo  oooooooooooooooooooooooooo      oo  oo",
 "oo      oo   ooooooooooooooooooooooooo  oooooooooooooooooooooooooo      oo  oo",
 "oo                                                                          oo",
 "oo                                                                          oo",
@@ -69,11 +69,6 @@ char mapa[40][79] = {
 
 void Iniciar() { gameOver = false;
 pontuacaoMaxima = 50; }
-
-void RenderMapa() {
-  for (int i = 0; i < 40; i++)
-    cout << mapa[i] << endl;
-}
 
 void RenderizarMapa() {
   printf("\033[2J\033[H");
@@ -131,7 +126,7 @@ void RenderizarMapa() {
   }
 }
 
-void Input() {
+void DefinirDirecaoJogador1() {
   if (jogador1.VRx.read() <= 0.33) {
     jogador1.dir = LEFT;
   } else if (jogador1.VRx.read() >= 0.66) {
@@ -143,7 +138,7 @@ void Input() {
   }
 }
 
-void Input2() {
+void DefinirDirecaoJogador2() {
   if (jogador2.VRx.read() <= 0.33) {
     jogador2.dir = LEFT;
   } else if (jogador2.VRx.read() >= 0.66) {
@@ -187,10 +182,7 @@ void Logic2() {
     break;
   }
 
-  if (jogador2.y == jogador1.y && jogador2.x == jogador1.x) {
-    gameOver = true;
-    mensagemFinal = "Jogador 2 venceu";
-  }
+  
 }
 
 void Logic() {
@@ -230,8 +222,17 @@ void Logic() {
     jogador1.pontuacao += 10;
     mapa[jogador1.y][jogador1.x] = ' ';
   }
+}
 
-  
+void VerificarVencedor() {
+    if (jogador2.y == jogador1.y && jogador2.x == jogador1.x) {
+        gameOver = true;
+        mensagemFinal = "Jogador 2 venceu!";
+    }
+    else if(jogador1.pontuacao == pontuacaoMaxima) {
+        gameOver = true;
+        mensagemFinal = "Jogador 1 venceu!";
+    }
 }
 
 int main() {
@@ -241,16 +242,17 @@ int main() {
   Iniciar();
 
   while (!gameOver) {
-    //   RenderMapa();
     RenderizarMapa();
-if(jogador1.pontuacao == pontuacaoMaxima)
-        gameOver = true;
-    Input();
-    Input2();
+    VerificarVencedor();
+    DefinirDirecaoJogador1();
+    DefinirDirecaoJogador2();
     Logic();
     Logic2();
   }
 
-  cout << gameOver;
+cout<< endl;
+cout<< endl;
+
+  printf("/n/n%s", mensagemFinal.c_str());
   return 0;
 }
