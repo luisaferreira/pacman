@@ -150,7 +150,7 @@ void DefinirDirecaoJogador2() {
   }
 }
 
-void Logic2() {
+void MovimentarJogador2() {
   if (jogador2.dir == UP && mapa[jogador2.y - 1][jogador2.x] == 'o')
     return;
 
@@ -180,12 +180,10 @@ void Logic2() {
     break;
   default:
     break;
-  }
-
-  
+  } 
 }
 
-void Logic() {
+void MovimentarJogador1() {
 
   if (jogador1.dir == UP && mapa[jogador1.y - 1][jogador1.x] == 'o')
     return;
@@ -246,8 +244,8 @@ int main() {
     VerificarVencedor();
     DefinirDirecaoJogador1();
     DefinirDirecaoJogador2();
-    Logic();
-    Logic2();
+    MovimentarJogador1();
+    MovimentarJogador2();
   }
 
 cout << "\n\n" << mensagemFinal << endl;
