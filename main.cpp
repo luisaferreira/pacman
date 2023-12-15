@@ -219,11 +219,6 @@ void MovimentarJogador1() {
   if (jogador1.dir == LEFT && mapa[jogador1.y][jogador1.x - 2] == 'o')
     return;
 
-//   if (jogador1.dir == RIGHT && (mapa[jogador1.y][jogador1.x + 2] == 'o' || mapa[jogador1.y + 2][jogador1.x + 3] == 'o'))
-//     return;
-//   if (jogador1.dir == LEFT && (mapa[jogador1.y][jogador1.x - 2] == 'o' || mapa[jogador1.y + 2][jogador1.x] == 'o'))
-//     return;
-
   jogador1.antigoX = jogador1.x;
   jogador1.antigoY = jogador1.y;
 
@@ -252,14 +247,19 @@ void MovimentarJogador1() {
 
 void VerificarVencedor() {
     if (jogador2.y == jogador1.y && jogador2.x == jogador1.x) {
-        gameOver = true;
         mensagemFinal = "Jogador 2 venceu!";
+        cout << "\033[45;33H\033[31m" << mensagemFinal;
+        ThisThread::sleep_for(200ms);
+        gameOver = true;
     }
     else if(jogador1.pontuacao == pontuacaoMaxima) {
-        gameOver = true;
         mensagemFinal = "Jogador 1 venceu!";
+        cout << "\033[44;33H\033[32m" << mensagemFinal;
+        ThisThread::sleep_for(200ms);
+        gameOver = true;
     }
 }
+
 void GameOver() {
   while (!gameOver) {
     mutex.lock();
