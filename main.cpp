@@ -247,15 +247,15 @@ void MovimentarJogador1() {
 
 void VerificarVencedor() {
     if (jogador2.y == jogador1.y && jogador2.x == jogador1.x) {
-        mensagemFinal = "Jogador 2 venceu!";
-        cout << "\033[45;33H\033[31m" << mensagemFinal;
-        ThisThread::sleep_for(200ms);
+        mensagemFinal = "🏆 Jogador 2 venceu! 🏆";
+        cout << "\033[45;32H\033[33m" << mensagemFinal;
+        ThisThread::sleep_for(300ms);
         gameOver = true;
     }
     else if(jogador1.pontuacao == pontuacaoMaxima) {
-        mensagemFinal = "Jogador 1 venceu!";
-        cout << "\033[44;33H\033[32m" << mensagemFinal;
-        ThisThread::sleep_for(200ms);
+        mensagemFinal = "🏆 Jogador 1 venceu! 🏆";
+        cout << "\033[44;32H\033[33m" << mensagemFinal;
+        ThisThread::sleep_for(300ms);
         gameOver = true;
     }
 }
