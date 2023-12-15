@@ -38,7 +38,7 @@ struct Jogador {
 };
 
 Jogador jogador1 = {74, 37, PA_0, PA_1, 0, UP, 75, 38};
-Jogador jogador2 = {2, 1, PC_1, PC_0, 0, DOWN, 3, 2};
+Jogador jogador2 = {2, 1, PC_1, PC_0, 0, RIGHT, 3, 2};
 
 char mapa[40][79] = {
 "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo",
@@ -74,7 +74,7 @@ char mapa[40][79] = {
 "oo  oo        oooooo                                            oo  oo      oo",
 "oo          oooooooo  oooooooooooooooo  oooooooooooooooooooooo  oo  oo  oo  oo",
 "oo          oooooooo  oooooooooooooooo  oooooooooooooooooooooo  oo  oo  oo  oo",
-"oo  oo                oooooooooooooooo  oooooooooooooooooooooo      oo      oo",
+"oo  oo                oooooooooooooooo* oooooooooooooooooooooo      oo      oo",
 "oo  oo                oooooooooooooooo  oooooooooooooooooooooo      oo      oo",
 "oo      oo   ooooooooooooooooooooooooo  oooooooooooooooooooooooooo      oo  oo",
 "oo      oo   ooooooooooooooooooooooooo  oooooooooooooooooooooooooo      oo  oo",
@@ -85,8 +85,7 @@ char mapa[40][79] = {
 
 void Iniciar() { 
     gameOver = false;
-    pontuacaoMaxima = 50;
-    //Imprimir o mapa cru
+    pontuacaoMaxima = 60;
 }
 
 void RenderizarMapa() {
@@ -94,14 +93,14 @@ void RenderizarMapa() {
   for (int i = 0; i < 40; i++) {
     for (int j = 0; j < 79; j++) {
       if (i == jogador1.y && j == jogador1.x) {
-        cout << "\033[1;31m"
+        cout << "\033[1;32m"
              << "👀"
              << "\033[0m";
         continue;
       }
 
       if (i == jogador1.y + 1 && j == jogador1.x) {
-        cout << "\033[1;31m" << "👄" << "\033[0m";
+        cout << "\033[1;32m" << "👄" << "\033[0m";
         continue;
       }
 
@@ -110,14 +109,14 @@ void RenderizarMapa() {
         continue;
 
       if (i == jogador2.y && j == jogador2.x) {
-        cout << "\033[1;32m"
+        cout << "\033[1;31m"
              << "👀"
              << "\033[0m";
         continue;
       }
 
       if (i == jogador2.y + 1 && j == jogador2.x) {
-        cout << "\033[1;32m"
+        cout << "\033[1;31m"
              << "👄"
              << "\033[0m";
         continue;
@@ -239,9 +238,9 @@ void MovimentarJogador1() {
     break;
   }
 
-  if (mapa[jogador1.y][jogador1.x] == '*') {
+  if (mapa[jogador1.antigoY - 1][jogador1.antigoX - 1] == '*') {
     jogador1.pontuacao += 10;
-    mapa[jogador1.y][jogador1.x] = ' ';
+    mapa[jogador1.antigoY - 1][jogador1.antigoX - 1] = ' ';
   }
 }
 
@@ -283,11 +282,11 @@ void Movimentar1(){
       sprintf(novoV, "%d", jogador1.y);
       sprintf(novoV2, "%d", jogador1.y + 1);
       sprintf(novoH, "%d", jogador1.x);
-
+      
       cout << "\033[" << v << ";" << h << "H ";
       cout << "\033[" << v2 << ";" << h << "H ";
-      cout << "\033[" << novoV << ";" << novoH << "H\033[31m👀";
-      cout << "\033[" << novoV2 << ";" << novoH << "H\033[31m👄";
+      cout << "\033[" << novoV << ";" << novoH << "H\033[32m👀";
+      cout << "\033[" << novoV2 << ";" << novoH << "H\033[32m👄";
 
       mutex.unlock();
       ThisThread::sleep_for(200ms);
@@ -309,10 +308,16 @@ void Movimentar2(){
       sprintf(novoV2, "%d", jogador2.y + 1);
       sprintf(novoH, "%d", jogador2.x);
 
-      cout << "\033[" << v << ";" << h << "H ";
-      cout << "\033[" << v2 << ";" << h << "H ";
-      cout << "\033[" << novoV << ";" << novoH << "H\033[32m👀";
-      cout << "\033[" << novoV2 << ";" << novoH << "H\033[32m👄";
+      if (mapa[jogador2.antigoY - 1][jogador2.antigoX - 1] == '*') {
+        cout << "\033[" << v << ";" << h << "H\033[31m🍒\033[0m";
+        cout << "\033[" << v2 << ";" << h << "H ";
+      } else {
+        cout << "\033[" << v << ";" << h << "H ";
+        cout << "\033[" << v2 << ";" << h << "H ";
+      }
+
+      cout << "\033[" << novoV << ";" << novoH << "H\033[31m👀";
+      cout << "\033[" << novoV2 << ";" << novoH << "H\033[31m👄";
 
       mutex.unlock();
       ThisThread::sleep_for(200ms);
@@ -353,51 +358,3 @@ int main() {
         ThisThread::sleep_for(5000ms);
     }
 }
-
-// char v[2];
-    // char v2[2];
-    // char h[2];
-
-    // char novoV[2];
-    // char novoV2[2];
-    // char novoH[2];
-    // char t = '3';
-    // char z = '2';
-    // sprintf(v, "%d", jogador1.antigoY);
-    // sprintf(v2, "%d", jogador1.antigoY + 1);
-    // sprintf(h, "%d", jogador1.antigoX);
-   
-    // sprintf(novoV, "%d", jogador1.y+2);
-    // sprintf(novoV2, "%d", jogador1.y + 1+2);
-    // sprintf(novoH, "%d", jogador1.x);
-
-    // //cout << "\033[2;3H👄";
-    // cout << "\033[2;5H" << novoV;
-    // cout << "\033[2;6H" << novoV2;
-    // cout << "\033[2;7H" << novoH;
-    // cout << "\033[" << v << ";" << h << "H ";
-    // cout << "\033[" << v2 << ";" << h << "H ";
-    // cout << "\033[" << novoV << ";" << novoH << "H\033[32m👀";
-    // cout << "\033[" << novoV2 << ";" << novoH << "H\033[32m👄";
-
-    // cout << "\033[" << y << ";" << x << "H👀";
-    // cout << "\033[2;3H "; // posicao jogador 2 Olho
-    // cout << "\033[3;3H "; // posicao jogador 2 Boca
-
-    // ThisThread::sleep_for(500ms); 
-    // cout << "\033[4;3H" << "\033[32m👀";
-    // cout << "\033[5;3H" << "\033[32m👄";
-
-    // ThisThread::sleep_for(500ms); 
-    // cout << "\033[6;3H "; // posicao jogador 2 Olho
-    // cout << "\033[7;3H "; // posicao jogador 2 Boca
-
-    // cout << "\033[8;3H" << "\033[32m👀";
-    // cout << "\033[9;3H" << "\033[32m👄";
-    // ThisThread::sleep_for(500ms); 
-
-
-    // cout << "\033[20;27H" << "👀";
-    // cout << "\033[21;27H" << "X";
-    // cout << "\033[12;17H" << "👄";
-
