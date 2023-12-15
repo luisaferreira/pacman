@@ -6,7 +6,16 @@
 #include "mbed.h"
 #include "rtos.h"
 #include <iostream>
+#include <string>
 #include <vector>
+
+Thread thread1;
+Thread player1;
+Thread player2;
+Thread thread3;
+Ticker ticker;
+Mutex mutex;
+int x = 0;
 
 string mensagemFinal = "";
 int pontuacaoMaxima;
@@ -14,15 +23,22 @@ bool gameOver;
 enum eDirecao { LEFT, RIGHT, UP, DOWN, STOP };
 DigitalOut V5(PF_1);
 
+struct Teste {
+    int a,b,c,d,e;
+};
+
+Teste teste = {0,0,0,0,0};
+
 struct Jogador {
   int x, y;
   AnalogIn VRx, VRy;
   int pontuacao;
   eDirecao dir;
+  int antigoX, antigoY;
 };
 
-Jogador jogador1 = {74, 37, PA_0, PA_1, 0, UP};
-Jogador jogador2 = {2, 1, PC_1, PC_0, 0, DOWN};
+Jogador jogador1 = {74, 37, PA_0, PA_1, 0, UP, 75, 38};
+Jogador jogador2 = {2, 1, PC_1, PC_0, 0, DOWN, 3, 2};
 
 char mapa[40][79] = {
 "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo",
@@ -67,23 +83,25 @@ char mapa[40][79] = {
 "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo",
 };
 
-void Iniciar() { gameOver = false;
-pontuacaoMaxima = 50; }
+void Iniciar() { 
+    gameOver = false;
+    pontuacaoMaxima = 50;
+    //Imprimir o mapa cru
+}
 
 void RenderizarMapa() {
   printf("\033[2J\033[H");
-  printf("Pontuação: %d\n\n", jogador1.pontuacao);
   for (int i = 0; i < 40; i++) {
     for (int j = 0; j < 79; j++) {
       if (i == jogador1.y && j == jogador1.x) {
-        cout << "\033[1;33m"
+        cout << "\033[1;31m"
              << "👀"
              << "\033[0m";
         continue;
       }
 
       if (i == jogador1.y + 1 && j == jogador1.x) {
-        cout << "\033[1;33m" << "👄" << "\033[0m";
+        cout << "\033[1;31m" << "👄" << "\033[0m";
         continue;
       }
 
@@ -124,6 +142,10 @@ void RenderizarMapa() {
     }
     cout << endl;
   }
+  jogador1.y = jogador1.antigoY;
+  jogador1.x = jogador1.antigoX;
+  jogador2.y = jogador2.antigoY;
+  jogador2.x = jogador2.antigoX;
 }
 
 void DefinirDirecaoJogador1() {
@@ -151,19 +173,20 @@ void DefinirDirecaoJogador2() {
 }
 
 void MovimentarJogador2() {
-  if (jogador2.dir == UP && mapa[jogador2.y - 1][jogador2.x] == 'o')
+  if (jogador2.dir == UP && mapa[jogador2.y - 2][jogador2.x] == 'o')
     return;
 
-  if (jogador2.dir == DOWN && mapa[jogador2.y + 2][jogador2.x] == 'o')
+  if (jogador2.dir == DOWN && mapa[jogador2.y + 1][jogador2.x] == 'o')
     return;
 
-  if (jogador2.dir == RIGHT && (mapa[jogador2.y][jogador2.x + 2] == 'o' ||
-                                mapa[jogador2.y + 1][jogador2.x + 2] == 'o'))
+  if (jogador2.dir == RIGHT && mapa[jogador2.y][jogador2.x + 2] == 'o')
     return;
 
-  if (jogador2.dir == LEFT && (mapa[jogador2.y][jogador2.x - 1] == 'o' ||
-                               mapa[jogador2.y + 1][jogador2.x - 1] == 'o'))
+  if (jogador2.dir == LEFT && mapa[jogador2.y][jogador2.x - 2] == 'o')
     return;
+  
+  jogador2.antigoY = jogador2.y;
+  jogador2.antigoX = jogador2.x;
 
   switch (jogador2.dir) {
   case UP:
@@ -184,20 +207,25 @@ void MovimentarJogador2() {
 }
 
 void MovimentarJogador1() {
-
-  if (jogador1.dir == UP && mapa[jogador1.y - 1][jogador1.x] == 'o')
+  if (jogador1.dir == UP && mapa[jogador1.y - 2][jogador1.x] == 'o')
     return;
 
-  if (jogador1.dir == DOWN && mapa[jogador1.y + 2][jogador1.x] == 'o')
+  if (jogador1.dir == DOWN && mapa[jogador1.y + 1][jogador1.x] == 'o')
     return;
 
-  if (jogador1.dir == RIGHT && (mapa[jogador1.y][jogador1.x + 2] == 'o' ||
-                                mapa[jogador1.y + 1][jogador1.x + 2] == 'o'))
+  if (jogador1.dir == RIGHT && mapa[jogador1.y][jogador1.x + 2] == 'o')
     return;
 
-  if (jogador1.dir == LEFT && (mapa[jogador1.y][jogador1.x - 1] == 'o' ||
-                               mapa[jogador1.y + 1][jogador1.x - 1] == 'o'))
+  if (jogador1.dir == LEFT && mapa[jogador1.y][jogador1.x - 2] == 'o')
     return;
+
+//   if (jogador1.dir == RIGHT && (mapa[jogador1.y][jogador1.x + 2] == 'o' || mapa[jogador1.y + 2][jogador1.x + 3] == 'o'))
+//     return;
+//   if (jogador1.dir == LEFT && (mapa[jogador1.y][jogador1.x - 2] == 'o' || mapa[jogador1.y + 2][jogador1.x] == 'o'))
+//     return;
+
+  jogador1.antigoX = jogador1.x;
+  jogador1.antigoY = jogador1.y;
 
   switch (jogador1.dir) {
   case UP:
@@ -232,23 +260,144 @@ void VerificarVencedor() {
         mensagemFinal = "Jogador 1 venceu!";
     }
 }
-
-int main() {
-  BufferedSerial pc(USBTX, USBRX, 115200);
-  V5 = 1;
-
-  Iniciar();
-
+void GameOver() {
   while (!gameOver) {
-    RenderizarMapa();
+    mutex.lock();
     VerificarVencedor();
+    mutex.unlock();
+  }
+}
+
+
+void Movimentar1(){
+    char v[3], v2[3], h[3];
+    char novoV[3], novoV2[3], novoH[3];
+
+    while (!gameOver) {
+      mutex.lock();
+
+      sprintf(v, "%d", jogador1.antigoY);
+      sprintf(v2, "%d", jogador1.antigoY + 1);
+      sprintf(h, "%d", jogador1.antigoX);
+
+      sprintf(novoV, "%d", jogador1.y);
+      sprintf(novoV2, "%d", jogador1.y + 1);
+      sprintf(novoH, "%d", jogador1.x);
+
+      cout << "\033[" << v << ";" << h << "H ";
+      cout << "\033[" << v2 << ";" << h << "H ";
+      cout << "\033[" << novoV << ";" << novoH << "H\033[31m👀";
+      cout << "\033[" << novoV2 << ";" << novoH << "H\033[31m👄";
+
+      mutex.unlock();
+      ThisThread::sleep_for(200ms);
+    }
+}
+
+void Movimentar2(){
+    char v[3], v2[3], h[3];
+    char novoV[3], novoV2[3], novoH[3];
+
+    while (!gameOver) {
+      mutex.lock();
+
+      sprintf(v, "%d", jogador2.antigoY);
+      sprintf(v2, "%d", jogador2.antigoY + 1);
+      sprintf(h, "%d", jogador2.antigoX);
+
+      sprintf(novoV, "%d", jogador2.y);
+      sprintf(novoV2, "%d", jogador2.y + 1);
+      sprintf(novoH, "%d", jogador2.x);
+
+      cout << "\033[" << v << ";" << h << "H ";
+      cout << "\033[" << v2 << ";" << h << "H ";
+      cout << "\033[" << novoV << ";" << novoH << "H\033[32m👀";
+      cout << "\033[" << novoV2 << ";" << novoH << "H\033[32m👄";
+
+      mutex.unlock();
+      ThisThread::sleep_for(200ms);
+    }
+}
+
+void Direcao() {
+  
+  while (!gameOver) {
+    mutex.lock();
     DefinirDirecaoJogador1();
     DefinirDirecaoJogador2();
     MovimentarJogador1();
     MovimentarJogador2();
+    mutex.unlock();
+    ThisThread::sleep_for(200ms);
   }
-
-cout << "\n\n" << mensagemFinal << endl;
-
-  return 0;
 }
+
+int main() {
+    BufferedSerial pc(USBTX, USBRX, 115200);
+    V5 = 1;
+    
+    mutex.lock();
+    RenderizarMapa();
+    Iniciar();  
+    ThisThread::sleep_for(300ms);
+    mutex.unlock();
+    
+    thread1.start(Direcao);
+
+    player1.start(Movimentar1);
+    player2.start(Movimentar2);
+
+    thread3.start(GameOver);
+
+    while(true) {
+        ThisThread::sleep_for(5000ms);
+    }
+}
+
+// char v[2];
+    // char v2[2];
+    // char h[2];
+
+    // char novoV[2];
+    // char novoV2[2];
+    // char novoH[2];
+    // char t = '3';
+    // char z = '2';
+    // sprintf(v, "%d", jogador1.antigoY);
+    // sprintf(v2, "%d", jogador1.antigoY + 1);
+    // sprintf(h, "%d", jogador1.antigoX);
+   
+    // sprintf(novoV, "%d", jogador1.y+2);
+    // sprintf(novoV2, "%d", jogador1.y + 1+2);
+    // sprintf(novoH, "%d", jogador1.x);
+
+    // //cout << "\033[2;3H👄";
+    // cout << "\033[2;5H" << novoV;
+    // cout << "\033[2;6H" << novoV2;
+    // cout << "\033[2;7H" << novoH;
+    // cout << "\033[" << v << ";" << h << "H ";
+    // cout << "\033[" << v2 << ";" << h << "H ";
+    // cout << "\033[" << novoV << ";" << novoH << "H\033[32m👀";
+    // cout << "\033[" << novoV2 << ";" << novoH << "H\033[32m👄";
+
+    // cout << "\033[" << y << ";" << x << "H👀";
+    // cout << "\033[2;3H "; // posicao jogador 2 Olho
+    // cout << "\033[3;3H "; // posicao jogador 2 Boca
+
+    // ThisThread::sleep_for(500ms); 
+    // cout << "\033[4;3H" << "\033[32m👀";
+    // cout << "\033[5;3H" << "\033[32m👄";
+
+    // ThisThread::sleep_for(500ms); 
+    // cout << "\033[6;3H "; // posicao jogador 2 Olho
+    // cout << "\033[7;3H "; // posicao jogador 2 Boca
+
+    // cout << "\033[8;3H" << "\033[32m👀";
+    // cout << "\033[9;3H" << "\033[32m👄";
+    // ThisThread::sleep_for(500ms); 
+
+
+    // cout << "\033[20;27H" << "👀";
+    // cout << "\033[21;27H" << "X";
+    // cout << "\033[12;17H" << "👄";
+
